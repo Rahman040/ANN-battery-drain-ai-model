@@ -26,7 +26,31 @@ hidden = tuple(int(h) for h in a.hidden.split(","))
 df = pd.read_csv(f"data/team_{a.team:02d}_train.csv")
 # TODO Mission 1: find the sensor glitches (plot every column first!) and write a rule that
 # marks them. Say in your report how many you found and why each rule is safe.
-bad = np.zeros(len(df), dtype=bool)
+import matplotlib.pyplot as plt
+
+# Plot each sensor column before removing glitches
+for col in FEATURES + ["days_left"]:
+    plt.figure()
+    plt.hist(df[col].dropna(), bins=40)
+    plt.title(f"Distribution of {col}")
+    plt.xlabel(col)
+    plt.ylabel("Frequency")
+    plt.tight_layout()
+    plt.savefig(f"model/{col}_distribution.png")
+    plt.close()
+
+    
+bad = (
+    (df["battery_v"] <= 0.0)
+    | (df["battery_v"] > 5.0)
+    | (df["temp_c"] < -50.0)
+    | (df["temp_c"] > 80.0)
+    | (df["wifi_rssi_dbm"] >= 0.0)
+    | (df["wifi_rssi_dbm"] < -120.0)
+    | (df["rings_per_day"] < 0.0)
+    | (df["age_months"] < 0.0)
+    | (df["days_left"] <= 0.0)
+)
 print(f"{len(df)} rows, {bad.sum()} glitch rows dropped")
 df = df[~bad]
 
@@ -36,11 +60,21 @@ val, tr = df.iloc[idx[:n_val]], df.iloc[idx[n_val:]]
 X, y = tr[FEATURES].to_numpy(np.float32), tr.days_left.to_numpy(np.float32)
 Xv, yv = val[FEATURES].to_numpy(np.float32), val.days_left.to_numpy(np.float32)
 # TODO Mission 2: normalisation. Why must mu and sd come from the TRAINING rows only?
-mu, sd = np.zeros(X.shape[1], np.float32), np.ones(X.shape[1], np.float32)
-
+mu = X.mean(axis=0)
+sd = X.std(axis=0)
+sd[sd == 0] = 1.0
 mae = lambda p, t: float(np.mean(np.abs(p - t)))
 print(f"baseline (predict the mean): {mae(np.full_like(yv, y.mean()), yv):.2f} days")
 # TODO Mission 1: a straight-line model (linear regression) as the second baseline.
+# Linear regression baseline
+X_bias = np.column_stack([X, np.ones(len(X))])
+Xv_bias = np.column_stack([Xv, np.ones(len(Xv))])
+
+weights, *_ = np.linalg.lstsq(X_bias, y, rcond=None)
+linear_predictions = Xv_bias @ weights
+
+print(f"baseline (linear regression): {mae(linear_predictions, yv):.2f} days")
+
 # Use np.linalg.lstsq on [X, 1]. Print its validation MAE the same way as the line above.
 
 torch.manual_seed(0)
