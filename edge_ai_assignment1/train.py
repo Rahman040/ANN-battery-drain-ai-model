@@ -92,8 +92,12 @@ for ep in range(a.epochs):
         with torch.no_grad():
             print(f"  epoch {ep:4d}  val MAE {mae(net(Xvt).numpy(), yv):.2f} days")
 with torch.no_grad():
+    train_mae = mae(net(Xt).numpy(), y)
     val_mae = mae(net(Xvt).numpy(), yv)
-print(f"network {hidden}:            {val_mae:.2f} days")
+
+print(f"network {hidden}:")
+print(f"  training MAE:   {train_mae:.2f} days")
+print(f"  validation MAE: {val_mae:.2f} days")
 
 os.makedirs("model", exist_ok=True)
 torch.save(net.state_dict(), "model/model.pt")
