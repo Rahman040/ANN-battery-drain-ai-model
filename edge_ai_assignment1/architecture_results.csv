@@ -1,0 +1,17 @@
+architecture,training_mae,validation_mae
+1-layer-4,12.78,12.53
+1-layer-8,16.19,16.32
+1-layer-16,11.10,11.58
+1-layer-32,8.82,9.16
+1-layer-64,8.15,8.78
+2-layer-4-4,8.87,8.96
+2-layer-8-8,5.49,6.07
+2-layer-16-16,4.16,4.95
+2-layer-32-32,3.85,4.60
+2-layer-64-64,3.15,4.55
+
+
+
+
+
+
