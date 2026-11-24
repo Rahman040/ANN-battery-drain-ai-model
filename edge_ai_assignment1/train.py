@@ -13,6 +13,8 @@ import os
 import numpy as np
 import pandas as pd
 import torch
+import matplotlib.pyplot as plt
+
 
 from app.model import FEATURES, BatteryNet
 
@@ -24,9 +26,19 @@ a = ap.parse_args()
 hidden = tuple(int(h) for h in a.hidden.split(","))
 
 df = pd.read_csv(f"data/team_{a.team:02d}_train.csv")
+# Scatter plots: days_left against every input feature
+for col in FEATURES:
+    plt.figure()
+    plt.scatter(df[col], df["days_left"], alpha=0.4, s=12)
+    plt.title(f"days_left vs {col}")
+    plt.xlabel(col)
+    plt.ylabel("days_left")
+    plt.tight_layout()
+    plt.savefig(f"model/{col}_vs_days_left.png")
+    plt.close()
+
 # TODO Mission 1: find the sensor glitches (plot every column first!) and write a rule that
 # marks them. Say in your report how many you found and why each rule is safe.
-import matplotlib.pyplot as plt
 
 # Plot each sensor column before removing glitches
 for col in FEATURES + ["days_left"]:
@@ -74,6 +86,20 @@ weights, *_ = np.linalg.lstsq(X_bias, y, rcond=None)
 linear_predictions = Xv_bias @ weights
 
 print(f"baseline (linear regression): {mae(linear_predictions, yv):.2f} days")
+# Plot linear regression predictions against true values
+plt.figure()
+plt.scatter(yv, linear_predictions, alpha=0.5)
+plt.plot(
+    [yv.min(), yv.max()],
+    [yv.min(), yv.max()],
+    "r--"
+)
+plt.xlabel("True days_left")
+plt.ylabel("Predicted days_left")
+plt.title("Linear Regression: Predicted vs True")
+plt.tight_layout()
+plt.savefig("model/linear_regression_predicted_vs_true.png")
+plt.close()
 
 # Use np.linalg.lstsq on [X, 1]. Print its validation MAE the same way as the line above.
 
