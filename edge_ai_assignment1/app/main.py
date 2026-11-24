@@ -65,6 +65,7 @@ def model_info():
                 "out": layer.out_features,
                 "params": params,
                 "bytes_f32": bytes_f32,
+                "bytes_int8": bytes_int8,
                 "macs": macs
             })
 
@@ -80,7 +81,9 @@ def model_info():
         "total_bytes_int8": total_bytes_int8,
         "total_macs": total_macs,
         "fits_300kb_sram_f32": total_bytes_f32 <= 300 * 1024,
-        "fits_300kb_sram_int8": total_bytes_int8 <= 300 * 1024
+        "fits_300kb_sram_int8": total_bytes_int8 <= 300 * 1024,
+        "fits_8mb_psram_f32": total_bytes_f32 <= 8 * 1024 * 1024,
+        "fits_8mb_psram_int8": total_bytes_int8 <= 8 * 1024 * 1024
     }
 
 
